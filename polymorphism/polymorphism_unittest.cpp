@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 #include "normal_inherit.h"
 #include "virtual_inherit.h"
+#include "function_overloading.h"
+#include "function_hiding.h"
 
 TEST(PolymorphismTest, NormalInherit) {
 	/*
@@ -191,7 +193,7 @@ TEST(PolymorphismTest, VirtualInherit) {
 	EXPECT_EQ(*reinterpret_cast<long *>(d), derived->d);
 
 	// ------------------------------Base--------------------------------
-	vptr =  *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 7);
+	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 7);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
 	auto *pBase = dynamic_cast<Base *>(derived);
 	offset = (uintptr_t)pBase - (uintptr_t)derived;
@@ -203,9 +205,37 @@ TEST(PolymorphismTest, VirtualInherit) {
 	auto *s = reinterpret_cast<uintptr_t *>(derived) + 8;
 	EXPECT_EQ(*reinterpret_cast<long *>(s), derived->s);
 
+	std::cout << "derived->s " << derived->s << std::endl;
+	std::cout << "derived->BaseA::s " << derived->BaseA::s << std::endl;
+	std::cout << "derived->BaseB::s " << derived->BaseB::s << std::endl;
+
 	auto as = reinterpret_cast<uintptr_t>(&derived->BaseA::s);
 	auto bs = reinterpret_cast<uintptr_t>(&derived->BaseB::s);
 	EXPECT_EQ(as, bs);
+	EXPECT_EQ(as, reinterpret_cast<uintptr_t>(&derived->s));
 
 	delete derived;
+}
+
+TEST(PolymorphismTest, FunctionOverloading) {
+	using namespace function_overloading;
+	auto *pb = new Base();
+
+	EXPECT_EQ(pb->foo(1), "Base::foo(long)");
+	EXPECT_EQ(pb->foo(1, 2), "Base::foo(long, long)");
+
+	delete pb;
+}
+
+TEST(PolymorphismTest, FunctionHiding) {
+	using namespace function_hiding;
+	Base *pb = new Base();
+	Base *pd = new Derived();
+
+	EXPECT_STREQ(pd->foo(0), "Base::foo(long)");
+	EXPECT_STREQ(dynamic_cast<Derived *>(pd)->foo(0, 0), "Derived::foo(long, long)");
+	EXPECT_STREQ(dynamic_cast<Derived *>(pd)->bar(), "Derived::bar()");
+
+	delete pb;
+	delete pd;
 }

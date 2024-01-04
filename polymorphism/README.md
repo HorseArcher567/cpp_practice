@@ -1,7 +1,28 @@
-## Polymorphism（多态性）
+# Polymorphism（多态性）
 
-### 1、normal_inherit（普通继承）
-#### 1.1 对于钻石继承，存在二义性和资源浪费
+## 1、 function overriding（函数重写）
+- 出现在类的继承关系中，即派生类中的函数与基类中的函数具有**相同的名称和签名**。
+- 派生类中的函数重新定义（override）了基类中的同名函数。
+- 重写是**运行时多态性**的一种表现，通过**虚函数和虚函数表**实现。
+- 在基类中，通过 virtual 关键字声明一个函数为虚函数，派生类中使用 override 关键字表示重写基类函数。
+
+### 1.1 normal_inherit（普通继承）
+#### 1.1.1 对于钻石继承，存在二义性和资源浪费
+二义性：
+```c++
+std::cout << "Ambiguity：" << std::endl;
+std::cout << "	derived->BaseA::s: " << derived->BaseA::s << std::endl;
+std::cout << "	derived->BaseB::s: " << derived->BaseB::s << std::endl;
+```
+
+资源浪费：
+```c++
+auto as = reinterpret_cast<uintptr_t>(&derived->BaseA::s);
+auto bs = reinterpret_cast<uintptr_t>(&derived->BaseB::s);
+EXPECT_NE(as, bs);
+```
+
+对象内部结构和虚函数表：
 ```c++
 (gdb) p *derived 
 $2 = {
@@ -47,8 +68,24 @@ vtable for 'normal_inherit::BaseC' @ 0x10007da98 (subobject @ 0x600002f18030):
 ```
 
 
-### 2、virtual_inherit（虚继承）
-#### 2.1 解决钻石继承的二义性和资源浪费
+### 1.2 virtual_inherit（虚继承）
+#### 1.2.1 解决钻石继承的二义性和资源浪费
+解决二义性：
+```c++
+std::cout << "derived->s " << derived->s << std::endl;
+std::cout << "derived->BaseA::s " << derived->BaseA::s << std::endl;
+std::cout << "derived->BaseB::s " << derived->BaseB::s << std::endl;
+```
+
+解决资源浪费：
+```c++
+auto as = reinterpret_cast<uintptr_t>(&derived->BaseA::s);
+auto bs = reinterpret_cast<uintptr_t>(&derived->BaseB::s);
+EXPECT_EQ(as, bs);
+EXPECT_EQ(as, reinterpret_cast<uintptr_t>(&derived->s));
+```
+
+类内部结构和虚函数表：
 ```c++
 (gdb) p *derived
 $1 = {
@@ -97,3 +134,14 @@ vtable for 'virtual_inherit::Base' @ 0x10007dd40 (subobject @ 0x60000230c038):
 [1]: 0x100007200 <virtual thunk to virtual_inherit::Derived::~Derived()>
 [2]: 0x100007220 <virtual thunk to virtual_inherit::Derived::foo()>
 ```
+
+## 2、function overloading（函数重载）
+- 在同一作用域中，可以定义多个函数，它们具有相同的名称但不同的参数列表。
+- 参数列表的不同可以涉及到参数类型、参数个数、参数顺序。
+- 编译器通过函数调用时传递的参数的类型和个数来区分重载函数。
+
+
+## 3、function hiding（函数隐藏）
+- 在类的派生关系中，如果派生类中的函数和基类中的函数具有相同的名称但不具有相同的参数列表，则称之为函数隐藏。
+- 函数隐藏会阻止派生类中的同名函数访问基类中的同名函数。
+
