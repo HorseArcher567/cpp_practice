@@ -24,3 +24,4 @@ target_compile_options(main PRIVATE -g)
 
 add_subdirectory(polymorphism)
 add_subdirectory(cast)
+add_subdirectory(RAII)

@@ -20,6 +20,7 @@ class Base {
 		}
 
 		const char *bar() const {
+			Unused(s);
 			return "Base::bar()";
 		}
 
@@ -40,6 +41,7 @@ class Derived final : public Base {
 
 		// WARNING: the compiler believes that function overriding should be used here.
 		const char *bar() const {
+			Unused(s);
 			return "Derived::bar()";
 		}
 };

@@ -1,6 +1,6 @@
 # cast practice
 ## dynamic_cast
-- 它只能用于包含虚函数的类层次结构，依赖RTTI(Run-Time Type Information)。
+- 它只能用于包含虚函数的类层次结构，依赖RTTI(Run-Time Type Identification)。
 - 在运行时进行安全的类型转换的操作符，它主要用于在继承体系中进行类型检查和类型转换。
 这个操作符通常用于将基类指针或引用转换为派生类指针或引用。
 - dynamic_cast返回指向目标类型的指针的空指针（如果是指针类型），
