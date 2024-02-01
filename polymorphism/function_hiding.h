@@ -5,47 +5,43 @@
 #ifndef CPP_PRACTICE_POLYMORPHISM_FUNCTION_HIDING_H_
 #define CPP_PRACTICE_POLYMORPHISM_FUNCTION_HIDING_H_
 
-#include <iostream>
-
 namespace function_hiding {
-
 #define Unused(x) ((void)x)
 
 class Base {
- public:
-	Base() = default;
-	virtual ~Base() = default;
+	public:
+		Base() = default;
+		virtual ~Base() = default;
 
-	const char* foo(long a) const {
-		Unused(a);
-		Unused(s);
-		return "Base::foo(long)";
-	}
+		const char *foo(const long a) const {
+			Unused(a);
+			Unused(s);
+			return "Base::foo(long)";
+		}
 
-	const char* bar() const {
-		Unused(s);
-		return "Base::bar";
-	}
+		const char *bar() const {
+			return "Base::bar()";
+		}
 
-	long s = 10;
+		long s = 10;
 };
 
-class Derived : public Base {
- public:
-	Derived() = default;
-	~Derived() override = default;
+class Derived final : public Base {
+	public:
+		Derived() = default;
+		~Derived() override = default;
 
-	const char* foo(int a, int b) const {
-		Unused(a);
-		Unused(b);
-		Unused(s);
-		return "Derived::foo(long, long)";
-	}
+		const char *foo(const int a, const int b) const {
+			Unused(a);
+			Unused(b);
+			Unused(s);
+			return "Derived::foo(long, long)";
+		}
 
-	const char* bar() const {
-		Unused(s);
-		return "Derived::bar()";
-	}
+		// WARNING: the compiler believes that function overriding should be used here.
+		const char *bar() const {
+			return "Derived::bar()";
+		}
 };
 }
 

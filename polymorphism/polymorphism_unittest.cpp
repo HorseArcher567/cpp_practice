@@ -39,31 +39,32 @@ TEST(PolymorphismTest, NormalInherit) {
 	 */
 	using namespace normal_inherit;
 	auto *derived = new Derived();
+	auto *addr = reinterpret_cast<uintptr_t *>(derived);
 
 	// -----------------------------BaseA--------------------------------
 	auto vptr = *reinterpret_cast<uintptr_t **>(derived);
 	auto offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
 	std::cout << "BaseA offsetToTop: " << offsetToTop << std::endl;
-	auto *pBaseA = dynamic_cast<BaseA *>(derived);
-	auto offset = (uintptr_t)pBaseA - (uintptr_t)derived;
+	BaseA *pBaseA = derived;
+	auto offset = reinterpret_cast<uintptr_t>(pBaseA) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 	auto typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
 	EXPECT_STREQ(typeInfoName, typeid(*derived).name());
 	auto fooValue = reinterpret_cast<long (*)(Derived *)>(vptr[2])(derived);
 	EXPECT_EQ(fooValue, derived->d);
 
-	auto *s = reinterpret_cast<uintptr_t *>(derived) + 1;
+	auto *s = addr + 1;
 	EXPECT_EQ(*reinterpret_cast<long *>(s), derived->BaseA::s);
 
 	auto *a = reinterpret_cast<uintptr_t *>(derived) + 2;
 	EXPECT_EQ(*reinterpret_cast<long *>(a), derived->a);
 
 	// ------------------------------BaseB--------------------------------
-	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 3);
+	vptr = *reinterpret_cast<uintptr_t **>(addr + 3);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
 	std::cout << "BaseB offsetToTop: " << offsetToTop << std::endl;
-	auto *pBaseB = dynamic_cast<BaseB *>(derived);
-	offset = (uintptr_t)pBaseB - (uintptr_t)derived;
+	BaseB *pBaseB = derived;
+	offset = reinterpret_cast<uintptr_t>(pBaseB) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 	typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
 	EXPECT_STREQ(typeInfoName, typeid(*derived).name());
@@ -77,11 +78,11 @@ TEST(PolymorphismTest, NormalInherit) {
 	EXPECT_EQ(*reinterpret_cast<long *>(b), derived->b);
 
 	// ------------------------------BaseC--------------------------------
-	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 6);
+	vptr = *reinterpret_cast<uintptr_t **>(addr + 6);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
 	std::cout << "BaseC offsetToTop: " << offsetToTop << std::endl;
-	auto *pBaseC = dynamic_cast<BaseC *>(derived);
-	offset = (uintptr_t)pBaseC - (uintptr_t)derived;
+	BaseC *pBaseC = derived;
+	offset = reinterpret_cast<uintptr_t>(pBaseC) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 	typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
 	EXPECT_STREQ(typeInfoName, typeid(*derived).name());
@@ -98,8 +99,8 @@ TEST(PolymorphismTest, NormalInherit) {
 	std::cout << "	derived->BaseA::s: " << derived->BaseA::s << std::endl;
 	std::cout << "	derived->BaseB::s: " << derived->BaseB::s << std::endl;
 	// 资源浪费
-	auto as = reinterpret_cast<uintptr_t>(&derived->BaseA::s);
-	auto bs = reinterpret_cast<uintptr_t>(&derived->BaseB::s);
+	auto *as = reinterpret_cast<uintptr_t *>(&derived->BaseA::s);
+	auto *bs = reinterpret_cast<uintptr_t *>(&derived->BaseB::s);
 	EXPECT_NE(as, bs);
 
 	delete derived;
@@ -133,12 +134,15 @@ TEST(PolymorphismTest, VirtualInherit) {
 	 */
 	using namespace virtual_inherit;
 	auto derived = new Derived();
+	auto addr = reinterpret_cast<uintptr_t *>(derived);
 
 	// -----------------------------BaseA--------------------------------
-	auto vptr = *reinterpret_cast<uintptr_t **>(derived);
+	auto vptr = *reinterpret_cast<uintptr_t **>(addr);
+	auto vbaseOffset = static_cast<ptrdiff_t>(vptr[-3]);
+	std::cout << "vbaseOffset: " << vbaseOffset << std::endl;
 	auto offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
-	auto *pBaseA = dynamic_cast<BaseA *>(derived);
-	auto offset = (uintptr_t)pBaseA - (uintptr_t)derived;
+	BaseA *pBaseA = derived;
+	auto offset = reinterpret_cast<uintptr_t>(pBaseA) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 
 	auto typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
@@ -154,10 +158,10 @@ TEST(PolymorphismTest, VirtualInherit) {
 	EXPECT_EQ(*reinterpret_cast<long *>(a), derived->a);
 
 	// ------------------------------BaseB--------------------------------
-	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 2);
+	vptr = *reinterpret_cast<uintptr_t **>(addr + 2);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
-	auto *pBaseB = dynamic_cast<BaseB *>(derived);
-	offset = (uintptr_t)pBaseB - (uintptr_t)derived;
+	BaseB *pBaseB = derived;
+	offset = reinterpret_cast<uintptr_t>(pBaseB) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 
 	typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
@@ -170,10 +174,10 @@ TEST(PolymorphismTest, VirtualInherit) {
 	EXPECT_EQ(*reinterpret_cast<long *>(b), derived->b);
 
 	// ------------------------------BaseC--------------------------------
-	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 4);
+	vptr = *reinterpret_cast<uintptr_t **>(addr + 4);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
-	auto *pBaseC = dynamic_cast<BaseC *>(derived);
-	offset = (uintptr_t)pBaseC - (uintptr_t)derived;
+	BaseC *pBaseC = derived;
+	offset = reinterpret_cast<uintptr_t>(pBaseC) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 
 	typeInfoName = reinterpret_cast<std::type_info *>(vptr[-1])->name();
@@ -193,10 +197,10 @@ TEST(PolymorphismTest, VirtualInherit) {
 	EXPECT_EQ(*reinterpret_cast<long *>(d), derived->d);
 
 	// ------------------------------Base--------------------------------
-	vptr = *reinterpret_cast<uintptr_t **>((uintptr_t *)derived + 7);
+	vptr = *reinterpret_cast<uintptr_t **>(addr + 7);
 	offsetToTop = static_cast<ptrdiff_t>(vptr[-2]);
-	auto *pBase = dynamic_cast<Base *>(derived);
-	offset = (uintptr_t)pBase - (uintptr_t)derived;
+	Base *pBase = derived;
+	offset = reinterpret_cast<uintptr_t>(pBase) - reinterpret_cast<uintptr_t>(derived);
 	EXPECT_EQ(offsetToTop, -offset);
 
 	fooValue = reinterpret_cast<long (*)(Base *)>(vptr[2])(pBase);
@@ -219,7 +223,7 @@ TEST(PolymorphismTest, VirtualInherit) {
 
 TEST(PolymorphismTest, FunctionOverloading) {
 	using namespace function_overloading;
-	auto *pb = new Base();
+	const auto *pb = new Base();
 
 	EXPECT_EQ(pb->foo(1), "Base::foo(long)");
 	EXPECT_EQ(pb->foo(1, 2), "Base::foo(long, long)");
@@ -229,11 +233,16 @@ TEST(PolymorphismTest, FunctionOverloading) {
 
 TEST(PolymorphismTest, FunctionHiding) {
 	using namespace function_hiding;
-	Base *pb = new Base();
+	const Base *pb = new Base();
 	Base *pd = new Derived();
 
 	EXPECT_STREQ(pd->foo(0), "Base::foo(long)");
+	// error: expected single argument 'a', have 2 arguments
+	// pd->foo(0, 0);
 	EXPECT_STREQ(dynamic_cast<Derived *>(pd)->foo(0, 0), "Derived::foo(long, long)");
+
+	EXPECT_STREQ(pb->bar(), "Base::bar()");
+	EXPECT_STREQ(pd->bar(), "Base::bar()");
 	EXPECT_STREQ(dynamic_cast<Derived *>(pd)->bar(), "Derived::bar()");
 
 	delete pb;

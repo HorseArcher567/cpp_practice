@@ -63,7 +63,7 @@ class BaseC {
 	long c = 40;
 };
 
-class Derived : public BaseA, public BaseB, public BaseC {
+class Derived final : public BaseA, public BaseB, public BaseC {
  public:
 	Derived() = default;
 	~Derived() override = default;

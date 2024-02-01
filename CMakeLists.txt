@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 cmake_policy(SET CMP0135 NEW)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-elide-constructors")
+
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -18,5 +20,7 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(main main.cpp)
+target_compile_options(main PRIVATE -g)
 
 add_subdirectory(polymorphism)
+add_subdirectory(cast)
